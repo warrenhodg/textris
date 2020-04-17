@@ -1,12 +1,15 @@
 pub mod tris;
 
 use tris::Block;
+use tris::VecGame;
+use tris::Game;
 
 fn main() -> () {
-    let mut b = tris::U16Block::new(tris::BlockType::T);
+    let mut b = tris::UBlock::new(tris::BlockType::T);
 
-    for _i in 0..9 {
-        println!("{0}", b.string());
-        b.rotate_clockwise();
-    }
+    let mut g = tris::VecGame::new(10, 10)
+        .ok()
+        .expect("invalid board size");
+
+    g.merge(&b, 1, 2);
 }
