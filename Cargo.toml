@@ -1,0 +1,8 @@
+[package]
+name = "textris"
+version = "0.0.1"
+authors = ["Warren Hodgkinson <warren.hodgkinson@gmail.com>"]
+
+[dependencies]
+rand = "0.3"
+
