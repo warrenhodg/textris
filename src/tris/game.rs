@@ -2,6 +2,7 @@ use super::Colour;
 use super::Block;
 use super::UBlock;
 use super::BlockType;
+use std::clone::Clone;
 
 pub trait Game {
     // Clear the game board - setting 
@@ -28,7 +29,7 @@ impl VecGame {
         } else {
             let mut board: Vec<Colour> = vec![];
 
-            board.resize((w * h) as usize, 0);
+            board.resize((w * h) as usize, Colour::Empty);
 
             Ok(VecGame {
                 w: w,
@@ -42,13 +43,13 @@ impl VecGame {
 impl Game for VecGame {
     fn clear(&mut self) {
         for i in 0..(self.w * self.h) as usize {
-            self.board[i] = 0;
+            self.board[i] = Colour::Empty;
         }
     }
     
     fn get(&self, x: isize, y: isize) -> Colour {
         if x < 0 || x >= self.w || y < 0 || y >= self.h {
-            0
+            Colour::Empty
         } else {
             let index = (y * self.w + x) as usize;
             self.board[index]
@@ -56,7 +57,10 @@ impl Game for VecGame {
     }
 
     fn filled(&self, x: isize, y: isize) -> bool {
-        self.get(x, y) != 0
+        match self.get(x, y) {
+            Colour::Empty => false,
+            _ => true,
+        }
     }
 
     fn set(&mut self, x: isize, y: isize, colour: Colour) {

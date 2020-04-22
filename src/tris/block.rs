@@ -33,13 +33,13 @@ pub struct UBlock {
 impl UBlock {
     pub fn new(t: BlockType) -> UBlock {
         match t {
-            BlockType::T  => UBlock::setup(0x0002|0x0010|0x0020|0x0040, 3, 2, 1),
-            BlockType::LL => UBlock::setup(0x0002|0x0020|0x0100|0x0200, 3, 3, 2),
-            BlockType::RL => UBlock::setup(0x0001|0x0010|0x0100|0x0200, 3, 3, 3),
-            BlockType::B  => UBlock::setup(0x0001|0x0020|0x0010|0x0020, 2, 2, 4),
-            BlockType::LZ => UBlock::setup(0x0001|0x0002|0x0020|0x0040, 3, 3, 5),
-            BlockType::RZ => UBlock::setup(0x0002|0x0004|0x0010|0x0020, 3, 3, 6),
-            BlockType::I  => UBlock::setup(0x0002|0x0020|0x0040|0x0080, 3, 4, 7),
+            BlockType::T  => UBlock::setup(0x0002|0x0010|0x0020|0x0040, 3, 2, Colour::Value(0)),
+            BlockType::LL => UBlock::setup(0x0002|0x0020|0x0100|0x0200, 3, 3, Colour::Value(1)),
+            BlockType::RL => UBlock::setup(0x0001|0x0010|0x0100|0x0200, 3, 3, Colour::Value(2)),
+            BlockType::B  => UBlock::setup(0x0001|0x0020|0x0010|0x0020, 2, 2, Colour::Value(3)),
+            BlockType::LZ => UBlock::setup(0x0001|0x0002|0x0020|0x0040, 3, 3, Colour::Value(4)),
+            BlockType::RZ => UBlock::setup(0x0002|0x0004|0x0010|0x0020, 3, 3, Colour::Value(5)),
+            BlockType::I  => UBlock::setup(0x0002|0x0020|0x0040|0x0080, 3, 4, Colour::Value(6)),
         }
     }
 
