@@ -5,7 +5,11 @@ use super::BlockType;
 
 pub trait Game {
     fn clear(&mut self);
+    fn get(&self, x: usize, y: usize) -> Colour;
+    fn filled(&self, x: usize, y: usize) -> bool;
     fn set(&mut self, x: usize, y: usize, colour: Colour) -> Result<(), String>;
+    fn out_of_bounds(&self, block: &impl Block, x: usize, y: usize) -> bool;
+    fn collision(&self, block: &impl Block, x: usize, y: usize) -> bool;
     fn merge(&mut self, block: &impl Block, x: usize, y: usize) -> Result<(), String>;
     fn string(&self) -> String;
 }
@@ -41,7 +45,20 @@ impl Game for VecGame {
         }
     }
     
-    fn set(&mut self, x: usize, y: usize, colour: Colour) -> Result<(), String>{
+    fn get(&self, x: usize, y: usize) -> Colour {
+        if x >= self.w || y >= self.h {
+            0
+        } else {
+            let index = (y * self.w + x) as usize;
+            self.board[index]
+        }
+    }
+
+    fn filled(&self, x: usize, y: usize) -> bool {
+        self.get(x, y) != 0
+    }
+
+    fn set(&mut self, x: usize, y: usize, colour: Colour) -> Result<(), String> {
         if x >= self.w || y >= self.h {
             Err("invalid position".to_string())
         } else {
@@ -51,18 +68,53 @@ impl Game for VecGame {
         }
     }
 
-    fn merge(&mut self, block: &impl Block, x: usize, y: usize) -> Result<(), String> {
-        let (w, h) = block.dims();
+    fn out_of_bounds(&self, block: &impl Block, x: usize, y: usize) -> bool {
+        let (bw, bh) = block.dims();
 
-        for _y in 0..h {
-            for _x in 0..w {
-                if block.get(_x, _y) {
-                    let x = _x + x;
-                    let y = _y + y;
+        for by in 0..bh {
+            for bx in 0..bw {
+                if block.get(bw, by) {
+                    let x = x + bx;
+                    let y = y + by;
+                    if x < 0 || x >= self.w || y < 0 || y >= self.h {
+                        return true
+                    }
+                }
+            }
+        }
+        false
+    }
+
+    fn collision(&self, block: &impl Block, x: usize, y: usize) -> bool {
+        let (bw, bh) = block.dims();
+
+        for by in 0..bh {
+            for bx in 0..bw {
+                if block.get(bw, by) {
+                    let x = x + bx;
+                    let y = y + by;
+                    if self.filled(x, y) {
+                        return true
+                    }
+                }
+            }
+        }
+
+        false
+    }
+
+    fn merge(&mut self, block: &impl Block, x: usize, y: usize) -> Result<(), String> {
+        let (bw, bh) = block.dims();
+
+        for by in 0..bh {
+            for bx in 0..bw {
+                if block.get(bx, by) {
+                    let x = x + bx;
+                    let y = y + by;
                     if x < 0 || x >= self.w || y < 0 || y >= self.h {
                         return Err("invalid location".to_string());
                     }
-                    self.set(_x, _y, block.colour());
+                    self.set(x, y, block.colour());
                 }
             }
         }
@@ -95,6 +147,14 @@ mod tests {
                 Ok(_) => assert!(!err, "should not have returned an error"),
             }
         }
+    }
+
+    fn game_get_set() {
+        let mut game = VecGame::new(10, 20);
+
+        let cases: Vec<(usize, usize, Vec(usize, usize, bool))> = vec![
+        ];
+
     }
 
     fn game_merge() {
