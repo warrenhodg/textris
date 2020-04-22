@@ -15,22 +15,25 @@ pub trait Block {
     fn colour(&self) -> Colour;
     fn rotate_clockwise(&mut self);
     fn rotate_anticlockwise(&mut self);
-    fn dims(&self) -> (usize, usize);
-    fn get(&self, x: usize, y: usize) -> bool;
+    fn dims(&self) -> (isize, isize);
+    fn get(&self, x: isize, y: isize) -> bool;
     fn string(&self) -> String;
 }
 
+type UBlockValue = u16;
+const UBLOCKSPAN: isize = 4;
+
 pub struct UBlock {
-    value: usize,
-    w: usize,
-    h: usize,
+    value: UBlockValue,
+    w: isize,
+    h: isize,
     colour: Colour,
 }
 
 impl UBlock {
     pub fn new(t: BlockType) -> UBlock {
         match t {
-            BlockType::T  => UBlock::setup(0x0002|0x0010|0x0020|0x0040, 3, 3, 1),
+            BlockType::T  => UBlock::setup(0x0002|0x0010|0x0020|0x0040, 3, 2, 1),
             BlockType::LL => UBlock::setup(0x0002|0x0020|0x0100|0x0200, 3, 3, 2),
             BlockType::RL => UBlock::setup(0x0001|0x0010|0x0100|0x0200, 3, 3, 3),
             BlockType::B  => UBlock::setup(0x0001|0x0020|0x0010|0x0020, 2, 2, 4),
@@ -40,7 +43,7 @@ impl UBlock {
         }
     }
 
-    fn setup(value: usize, w: usize, h: usize, colour: Colour) -> UBlock {
+    fn setup(value: UBlockValue, w: isize, h: isize, colour: Colour) -> UBlock {
         UBlock {
             value: value,
             w: w,
@@ -60,18 +63,18 @@ impl Block for UBlock {
     // w:h -> 0:w
     // 0:h -> 0:0
     fn rotate_clockwise(&mut self) {
-        let mut v: usize = 0;
+        let mut v: UBlockValue = 0;
         let w = self.w;
         let h = self.h;
 
         for y in 0..h {
             for x in 0..w {
-                let m: usize = 1 << (y * 4 + x);
+                let m: UBlockValue = 1 << (y * UBLOCKSPAN + x);
                 if self.value & m == m {
-                    let _x = h - y - 1;
-                    let _y = x;
-                    let _m: usize = 1 << (_y * 4 + _x);
-                    v |= _m
+                    let nx = h - y - 1;
+                    let ny = x;
+                    let nm: UBlockValue = 1 << (ny * UBLOCKSPAN + nx);
+                    v |= nm
                 }
             }
         }
@@ -86,18 +89,18 @@ impl Block for UBlock {
     // w:h -> h:0
     // 0:h -> h:w
     fn rotate_anticlockwise(&mut self) {
-        let mut v: usize = 0;
+        let mut v: UBlockValue = 0;
         let w = self.w;
         let h = self.h;
 
         for y in 0..h {
             for x in 0..w {
-                let m: usize = 1 << (y * 4 + x);
+                let m: UBlockValue = 1 << (y * UBLOCKSPAN + x);
                 if self.value & m == m {
-                    let _x = y;
-                    let _y = w - x;
-                    let _m: usize = 1 << (_y * 4 + _x);
-                    v |= _m
+                    let nx = y;
+                    let ny = w - x;
+                    let nm: UBlockValue = 1 << (ny * UBLOCKSPAN + nx);
+                    v |= nm
                 }
             }
         }
@@ -107,15 +110,15 @@ impl Block for UBlock {
         self.h = w;
     }
 
-    fn dims(&self) -> (usize, usize) {
+    fn dims(&self) -> (isize, isize) {
         (self.w, self.h)
     }
 
-    fn get(&self, x: usize, y: usize) -> bool {
+    fn get(&self, x: isize, y: isize) -> bool {
         if x >= self.w || y >= self.h {
             false
         } else {
-            let m = 1 << (y * 4 + x);
+            let m = 1 << (y * UBLOCKSPAN + x);
             self.value & m == m
         }
     }

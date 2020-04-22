@@ -4,24 +4,25 @@ use super::UBlock;
 use super::BlockType;
 
 pub trait Game {
+    // Clear the game board - setting 
     fn clear(&mut self);
-    fn get(&self, x: usize, y: usize) -> Colour;
-    fn filled(&self, x: usize, y: usize) -> bool;
-    fn set(&mut self, x: usize, y: usize, colour: Colour) -> Result<(), String>;
-    fn out_of_bounds(&self, block: &impl Block, x: usize, y: usize) -> bool;
-    fn collision(&self, block: &impl Block, x: usize, y: usize) -> bool;
-    fn merge(&mut self, block: &impl Block, x: usize, y: usize) -> Result<(), String>;
+    fn get(&self, x: isize, y: isize) -> Colour;
+    fn filled(&self, x: isize, y: isize) -> bool;
+    fn set(&mut self, x: isize, y: isize, colour: Colour);
+    fn out_of_bounds(&self, block: &impl Block, x: isize, y: isize) -> bool;
+    fn collision(&self, block: &impl Block, x: isize, y: isize) -> bool;
+    fn merge(&mut self, block: &impl Block, x: isize, y: isize);
     fn string(&self) -> String;
 }
 
 pub struct VecGame {
-    w: usize,
-    h: usize,
+    w: isize,
+    h: isize,
     board: Vec<Colour>,
 }
 
 impl VecGame {
-    pub fn new(w: usize, h: usize) -> Result<VecGame, String> {
+    pub fn new(w: isize, h: isize) -> Result<VecGame, String> {
         if w < 4 || h < 4 {
             Err("too small".to_string())
         } else {
@@ -40,13 +41,13 @@ impl VecGame {
 
 impl Game for VecGame {
     fn clear(&mut self) {
-        for i in 0..self.w * self.h {
+        for i in 0..(self.w * self.h) as usize {
             self.board[i] = 0;
         }
     }
     
-    fn get(&self, x: usize, y: usize) -> Colour {
-        if x >= self.w || y >= self.h {
+    fn get(&self, x: isize, y: isize) -> Colour {
+        if x < 0 || x >= self.w || y < 0 || y >= self.h {
             0
         } else {
             let index = (y * self.w + x) as usize;
@@ -54,21 +55,20 @@ impl Game for VecGame {
         }
     }
 
-    fn filled(&self, x: usize, y: usize) -> bool {
+    fn filled(&self, x: isize, y: isize) -> bool {
         self.get(x, y) != 0
     }
 
-    fn set(&mut self, x: usize, y: usize, colour: Colour) -> Result<(), String> {
-        if x >= self.w || y >= self.h {
-            Err("invalid position".to_string())
-        } else {
-            let index = (y * self.w + x) as usize;
-            self.board[index] = colour;
-            Ok(())
-        }
+    fn set(&mut self, x: isize, y: isize, colour: Colour) {
+        if x < 0 || x >= self.w || y < 0 || y >= self.h {
+            return
+        } 
+        
+        let index = (y * self.w + x) as usize;
+        self.board[index] = colour;
     }
 
-    fn out_of_bounds(&self, block: &impl Block, x: usize, y: usize) -> bool {
+    fn out_of_bounds(&self, block: &impl Block, x: isize, y: isize) -> bool {
         let (bw, bh) = block.dims();
 
         for by in 0..bh {
@@ -85,15 +85,13 @@ impl Game for VecGame {
         false
     }
 
-    fn collision(&self, block: &impl Block, x: usize, y: usize) -> bool {
+    fn collision(&self, block: &impl Block, x: isize, y: isize) -> bool {
         let (bw, bh) = block.dims();
 
         for by in 0..bh {
             for bx in 0..bw {
                 if block.get(bw, by) {
-                    let x = x + bx;
-                    let y = y + by;
-                    if self.filled(x, y) {
+                    if self.filled(x + bx, y + by) {
                         return true
                     }
                 }
@@ -103,23 +101,16 @@ impl Game for VecGame {
         false
     }
 
-    fn merge(&mut self, block: &impl Block, x: usize, y: usize) -> Result<(), String> {
+    fn merge(&mut self, block: &impl Block, x: isize, y: isize) {
         let (bw, bh) = block.dims();
 
         for by in 0..bh {
             for bx in 0..bw {
                 if block.get(bx, by) {
-                    let x = x + bx;
-                    let y = y + by;
-                    if x < 0 || x >= self.w || y < 0 || y >= self.h {
-                        return Err("invalid location".to_string());
-                    }
-                    self.set(x, y, block.colour());
+                    self.set(x + bx, y + by, block.colour());
                 }
             }
         }
-
-        Ok(())
     }
 
     fn string(&self) -> String {
@@ -133,7 +124,7 @@ mod tests {
 
     #[test]
     fn game_new() {
-        let cases: Vec<(usize, usize, bool)> = vec![
+        let cases: Vec<(isize, isize, bool)> = vec![
             (3, 3, true),
             (4, 4, false),
             (10, 10, false),
@@ -152,13 +143,13 @@ mod tests {
     fn game_get_set() {
         let mut game = VecGame::new(10, 20);
 
-        let cases: Vec<(usize, usize, Vec(usize, usize, bool))> = vec![
+        let cases: Vec<(isize, isize, Vec(isize, isize, bool))> = vec![
         ];
 
     }
 
     fn game_merge() {
-        let cases: Vec<(usize, usize, bool)> = vec![
+        let cases: Vec<(isize, isize, bool)> = vec![
         ];
 
         for case in cases {
