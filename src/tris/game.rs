@@ -2,7 +2,6 @@ use super::Colour;
 use super::Block;
 use super::UBlock;
 use super::BlockType;
-use std::clone::Clone;
 
 pub trait Game {
     // Clear the game board - setting 
@@ -144,31 +143,49 @@ mod tests {
         }
     }
 
+    #[test]
     fn game_get_set() {
-        let mut game = VecGame::new(10, 20);
+        let mut game = VecGame::new(10, 20)
+            .ok()
+            .expect("game could not be created");
 
-        let cases: Vec<(isize, isize, Vec(isize, isize, bool))> = vec![
-        ];
-
-    }
-
-    fn game_merge() {
-        let cases: Vec<(isize, isize, bool)> = vec![
+        let cases: Vec<(isize, isize, Colour, Vec<(isize, isize, Colour)>)> = vec![
+            (5, 5, Colour::Value(0), vec![
+               (-1, -1, Colour::Empty),
+               (0, 0, Colour::Empty),
+               (5, 5, Colour::Value(0)),
+               (15, 5, Colour::Empty),
+            ]),
         ];
 
         for case in cases {
-            let (x, y, err) = case;
+            let (x, y, colour, tests) = case;
+            game.set(x, y, colour);
+
+            for test in tests {
+                let (x, y, want_colour) = test;
+
+                let colour = game.get(x, y);
+
+                assert!(colour == want_colour, format!("expected {0} to equal {1}", colour, want_colour));
+            }
+        }
+    }
+
+    #[test]
+    fn game_merge() {
+        let cases: Vec<(isize, isize)> = vec![
+        ];
+
+        for case in cases {
+            let (x, y) = case;
 
             let mut g = VecGame::new(10, 10)
                 .ok()
                 .expect("could not create new game");
 
             let b = UBlock::new(BlockType::T);
-            let result = g.merge(&b, x, y);
-            match result {
-                Err(_) => assert!(err, "should have returned an error"),
-                Ok(_) => assert!(!err, "should not have returned an error"),
-            }
+            g.merge(&b, x, y);
         }
     }
 }
