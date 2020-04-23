@@ -1,5 +1,4 @@
 use super::Colour;
-use super::Game;
 
 pub enum BlockType {
     T,
@@ -21,7 +20,7 @@ pub trait Block {
 }
 
 type UBlockValue = u16;
-const UBLOCKSPAN: isize = 4;
+const UBLOCK_SPAN: isize = 4;
 
 pub struct UBlock {
     value: UBlockValue,
@@ -69,11 +68,11 @@ impl Block for UBlock {
 
         for y in 0..h {
             for x in 0..w {
-                let m: UBlockValue = 1 << (y * UBLOCKSPAN + x);
+                let m: UBlockValue = 1 << (y * UBLOCK_SPAN + x);
                 if self.value & m == m {
                     let nx = h - y - 1;
                     let ny = x;
-                    let nm: UBlockValue = 1 << (ny * UBLOCKSPAN + nx);
+                    let nm: UBlockValue = 1 << (ny * UBLOCK_SPAN + nx);
                     v |= nm
                 }
             }
@@ -95,11 +94,11 @@ impl Block for UBlock {
 
         for y in 0..h {
             for x in 0..w {
-                let m: UBlockValue = 1 << (y * UBLOCKSPAN + x);
+                let m: UBlockValue = 1 << (y * UBLOCK_SPAN + x);
                 if self.value & m == m {
                     let nx = y;
                     let ny = w - x;
-                    let nm: UBlockValue = 1 << (ny * UBLOCKSPAN + nx);
+                    let nm: UBlockValue = 1 << (ny * UBLOCK_SPAN + nx);
                     v |= nm
                 }
             }
@@ -115,10 +114,10 @@ impl Block for UBlock {
     }
 
     fn get(&self, x: isize, y: isize) -> bool {
-        if x >= self.w || y >= self.h {
+        if x < 0 || x >= self.w || y < 0 || y >= self.h {
             false
         } else {
-            let m = 1 << (y * UBLOCKSPAN + x);
+            let m = 1 << (y * UBLOCK_SPAN + x);
             self.value & m == m
         }
     }
@@ -134,33 +133,82 @@ mod tests {
 
     #[test]
     fn block_new() {
-        let b = UBlock::new(BlockType::T);
-        assert_eq!(b.value, 0x0072);
-        assert_eq!(b.w, 3);
-        assert_eq!(b.h, 3);
+        let cases: Vec<(BlockType, UBlockValue, isize, isize)> = vec![
+            (BlockType::T, 0x0072, 3, 2),
+        ];
+
+        for case in cases {
+            let (block_type, want_value, want_width, want_height) = case;
+
+            let b = UBlock::new(block_type);
+
+            assert_eq!(b.value, want_value);
+            assert_eq!(b.w, want_width);
+            assert_eq!(b.h, want_height);
+        }
+    }
+
+    #[test]
+    fn block_get() {
+        let cases: Vec<(BlockType, UBlockValue, Vec<(isize, isize, bool)>)> = vec![
+            (BlockType::T, 0x0072, vec![
+              (-1, -1, false),
+              (0, -1, false),
+              (10, -1, false),
+              (-1, 0, false),
+              (0, 0, false),
+              (1, 0, true),
+              (2, 0, false),
+              (10, 0, false),
+              (0, 1, true),
+              (1, 1, true),
+              (2, 1, true),
+            ]),
+        ];
+
+        for case in cases {
+            let (block_type, want_value, tests) = case;
+            let b = UBlock::new(block_type);
+            assert_eq!(b.value, want_value, "value");
+
+            for test in tests {
+                let (x, y, want_filled) = test;
+                assert_eq!(b.get(x, y), want_filled, "get");
+            }
+        }
     }
 
     #[test]
     fn block_rotate_clockwise() {
-        let mut b = UBlock::new(BlockType::T);
-        b.rotate_clockwise();
-        assert_eq!(b.value, 0x0262);
-        assert_eq!(b.w, 3);
-        assert_eq!(b.h, 3);
-        assert_eq!(b.dims(), (3, 3));
-        assert_eq!(b.get(0, 0), false);
-        assert_eq!(b.get(1, 0), true);
-        assert_eq!(b.get(2, 0), false);
-        assert_eq!(b.get(1000, 0), false);
+        let cases: Vec<(BlockType, UBlockValue, isize, isize)> = vec![
+            (BlockType::T, 0x0131, 2, 3),
+        ];
+
+        for case in cases {
+            let (block_type, want_value, want_width, want_height) = case;
+
+            let mut b = UBlock::new(block_type);
+            b.rotate_clockwise();
+            assert!(b.value == want_value, format!("received value 0x{0:04x?} instead of 0x{1:04x?}", b.value, want_value));
+            assert!(b.w == want_width, format!("received w {0} instead of {1}", b.w, want_width));
+            assert!(b.h == want_height, format!("received h {0} instead of {1}", b.h, want_height));
+        }
     }
 
     #[test]
     fn block_rotate_anticlockwise() {
-        let mut b = UBlock::new(BlockType::T);
-        b.rotate_anticlockwise();
-        assert_eq!(b.value, 0x2320);
-        assert_eq!(b.w, 3);
-        assert_eq!(b.h, 3);
+        let cases: Vec<(BlockType, UBlockValue, isize, isize)> = vec![
+            (BlockType::T, 0x2320, 2, 3),
+        ];
+
+        for case in cases {
+            let (block_type, want_value, want_width, want_height) = case;
+
+            let mut b = UBlock::new(block_type);
+            b.rotate_anticlockwise();
+            assert!(b.value == want_value, format!("received value {0:4x} instead of {1:4x}", b.value, want_value));
+            assert!(b.w == want_width, format!("received w {0} instead of {1}", b.w, want_width));
+            assert!(b.h == want_height, format!("received h {0} instead of {1}", b.h, want_height));
+        }
     }
 }
-
