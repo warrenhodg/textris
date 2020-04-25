@@ -1,5 +1,6 @@
 use super::input::Input;
 use super::output::Output;
+use super::tris::VecGame;
 use termion::event::Key;
 
 pub struct GameLoop<'a> {
@@ -35,7 +36,10 @@ impl <'a> GameLoop<'a> {
     }
 
     fn play_game(&mut self) {
+        let g = &mut VecGame::new(10, 10).unwrap();
+
         self.output.show_message("playing".to_string());
+        self.output.show_game(g);
         std::thread::sleep(std::time::Duration::from_millis(2000));
     }
 
