@@ -1,17 +1,20 @@
 use super::Colour;
 use super::Block;
+#[cfg(test)]
 use super::UBlock;
+#[cfg(test)]
 use super::BlockType;
 
 pub trait Game {
     // Clear the game board - setting 
     fn clear(&mut self);
+    fn dims(&self) -> (isize, isize);
     fn get(&self, x: isize, y: isize) -> Colour;
     fn filled(&self, x: isize, y: isize) -> bool;
     fn set(&mut self, x: isize, y: isize, colour: Colour);
-    fn out_of_bounds(&self, block: &impl Block, x: isize, y: isize) -> bool;
-    fn collision(&self, block: &impl Block, x: isize, y: isize) -> bool;
-    fn merge(&mut self, block: &impl Block, x: isize, y: isize);
+    fn out_of_bounds(&self, block: &mut dyn Block, x: isize, y: isize) -> bool;
+    fn collision(&self, block: &mut dyn Block, x: isize, y: isize) -> bool;
+    fn merge(&mut self, block: &mut dyn Block, x: isize, y: isize);
     fn string(&self) -> String;
 }
 
@@ -46,6 +49,10 @@ impl Game for VecGame {
         }
     }
     
+    fn dims(&self) -> (isize, isize) {
+        (self.w, self.h)
+    }
+
     fn get(&self, x: isize, y: isize) -> Colour {
         if x < 0 || x >= self.w || y < 0 || y >= self.h {
             Colour::Empty
@@ -71,7 +78,7 @@ impl Game for VecGame {
         self.board[index] = colour;
     }
 
-    fn out_of_bounds(&self, block: &impl Block, x: isize, y: isize) -> bool {
+    fn out_of_bounds(&self, block: &mut dyn Block, x: isize, y: isize) -> bool {
         let (bw, bh) = block.dims();
 
         for by in 0..bh {
@@ -88,7 +95,7 @@ impl Game for VecGame {
         false
     }
 
-    fn collision(&self, block: &impl Block, x: isize, y: isize) -> bool {
+    fn collision(&self, block: &mut dyn Block, x: isize, y: isize) -> bool {
         let (bw, bh) = block.dims();
 
         for by in 0..bh {
@@ -104,7 +111,7 @@ impl Game for VecGame {
         false
     }
 
-    fn merge(&mut self, block: &impl Block, x: isize, y: isize) {
+    fn merge(&mut self, block: &mut dyn Block, x: isize, y: isize) {
         let (bw, bh) = block.dims();
 
         for by in 0..bh {
@@ -184,8 +191,8 @@ mod tests {
                 .ok()
                 .expect("could not create new game");
 
-            let b = UBlock::new(BlockType::T);
-            g.merge(&b, x, y);
+            let b = &mut UBlock::new(BlockType::T);
+            g.merge(b, x, y);
         }
     }
 }
