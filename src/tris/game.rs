@@ -1,5 +1,7 @@
 use super::Colour;
 use super::Block;
+use super::UBlock;
+use super::BlockType;
 
 pub trait Game {
     // Clear the game board - setting 
