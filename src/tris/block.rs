@@ -97,7 +97,7 @@ impl Block {
                 let m: BlockValue = 1 << (y * BLOCK_SPAN + x);
                 if self.value & m == m {
                     let nx = y;
-                    let ny = w - x;
+                    let ny = w - x - 1;
                     let nm: BlockValue = 1 << (ny * BLOCK_SPAN + nx);
                     v |= nm
                 }
@@ -199,7 +199,7 @@ mod tests {
         let mut b = Block::new();
 
         let cases: Vec<(BlockValue, isize, isize, BlockValue, isize, isize)> = vec![
-            (0x0072, 3, 2, 0x2320, 2, 3),
+            (0x0072, 3, 2, 0x0232, 2, 3),
         ];
 
         for case in cases {
