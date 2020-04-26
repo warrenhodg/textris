@@ -121,10 +121,6 @@ impl Block {
             self.value & m == m
         }
     }
-
-    pub fn string(&self) -> String {
-        format!("0x{0:04x}", self.value)
-    }
 }
 
 #[cfg(test)]
