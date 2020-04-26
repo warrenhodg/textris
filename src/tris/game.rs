@@ -19,19 +19,19 @@ impl Game {
 
             board.resize((w * h) as usize, Colour::Empty);
 
-            let mut block = super::Block::new();
-            let (dx, dy) = block.random();
-
-            let mut b = Self {
-                x: w / 2 + dx,
-                y: 0 + dy,
-                block: block,
+            let mut g = Self {
+                x: 0,
+                y: 0,
+                block: super::Block::new(),
                 w: w,
                 h: h,
                 board: board,
             };
 
-            Ok(b)
+            g.clear();
+            g.random();
+
+            Ok(g)
         }
     }
 
