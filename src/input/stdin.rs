@@ -1,15 +1,27 @@
 use super::Input;
+use super::InputKey;
 
-use termion::event::Key;
-use termion::input::TermRead;
+use std::io::Read;
+use termion::AsyncReader;
 
-pub fn new<'a>() -> std::io::Stdin {
-    std::io::stdin()
+pub fn new<'a>() -> AsyncReader {
+    termion::async_stdin()
 }
 
-impl Input for std::io::Stdin {
-    fn get_key(&mut self) -> Option<Result<Key, std::io::Error>> {
-        self.keys().next()
+impl Input for AsyncReader {
+    fn get_key(&mut self) -> Option<InputKey> {
+        let mut buf: [u8; 1] = [0];
+        let res = self.read(&mut buf);
+        match res {
+            Ok(n) => {
+                if n == 0 {
+                    Option::<InputKey>::None
+                } else {
+                    Option::<InputKey>::Some(buf[0] as char)
+                }
+            },
+            _ => Option::<InputKey>::None,
+        }
     }
 }
 
