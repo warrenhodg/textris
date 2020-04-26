@@ -63,6 +63,9 @@ impl <'a> GameLoop<'a> {
             match self.input.get_key() {
                 None => {
                     std::thread::sleep(GAME_LOOP_PERIOD);
+                    if g.tick() {
+                        changed = true;
+                    }
                 },
                 Some(k) => match k {
                     'a' => {

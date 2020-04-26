@@ -8,6 +8,8 @@ pub struct Game {
     w: isize,
     h: isize,
     board: Vec<Colour>,
+    last_fall: std::time::Instant,
+    fall_rate_nanos: u128,
 }
 
 impl Game {
@@ -26,6 +28,8 @@ impl Game {
                 w: w,
                 h: h,
                 board: board,
+                last_fall: std::time::Instant::now(),
+                fall_rate_nanos: std::time::Duration::from_millis(1000).as_nanos(),
             };
 
             g.clear();
@@ -45,6 +49,21 @@ impl Game {
         let (dx, dy) = self.block.random();
         self.x = self.w / 2 + dx;
         self.y = dy;
+        self.last_fall = std::time::Instant::now();
+    }
+
+    pub fn tick(&mut self) -> bool {
+        let now = std::time::Instant::now();
+        if now.duration_since(self.last_fall).as_nanos() < self.fall_rate_nanos {
+            return false;
+        }
+
+        if !self.down() {
+            self.merge();
+            self.random();
+        }
+
+        true
     }
 
     pub fn dims(&self) -> (isize, isize) {
@@ -157,6 +176,8 @@ impl Game {
             return false;
         }
 
+        self.last_fall = std::time::Instant::now();
+ 
         self.y += 1;
         true
     }
