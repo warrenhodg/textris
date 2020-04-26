@@ -1,9 +1,8 @@
 use super::Colour;
 use super::Block;
+
 #[cfg(test)]
-use super::UBlock;
-#[cfg(test)]
-use super::BlockType;
+use super::TEST_BLOCK;
 
 pub trait Game {
     // Clear the game board - setting 
@@ -191,7 +190,7 @@ mod tests {
                 .ok()
                 .expect("could not create new game");
 
-            let b = &mut UBlock::new(BlockType::T);
+            let b = &mut TEST_BLOCK;
             g.merge(b, x, y);
         }
     }
