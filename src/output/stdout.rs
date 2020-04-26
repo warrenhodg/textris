@@ -35,7 +35,11 @@ impl <'a> Output for termion::raw::RawTerminal<std::io::Stdout> {
     }
 
     fn show_main_menu(&mut self) {
-        write!(self, "{}{}", termion::clear::All, termion::cursor::Goto(1, 1)).unwrap();
+        write!(self, "{}{}{}",
+               termion::clear::All,
+               termion::color::Fg(termion::color::Rgb(196, 196, 196)),
+               termion::cursor::Goto(1, 1),
+               ).unwrap();
         //write!(self, "textris-{}\r\n", VERSION).unwrap();
         write!(self, "\r\n").unwrap();
         write!(self, "Menu:\r\n").unwrap();
@@ -89,7 +93,7 @@ impl <'a> Output for termion::raw::RawTerminal<std::io::Stdout> {
 
         //Display bottom wall
         write!(self, "{}", color::Fg(color::Rgb(96, 96, 96))).unwrap();
-        for x in 0..width+2 {
+        for _ in 0..width+2 {
             write!(self, "{}", BLOCK).unwrap();
         }
 
