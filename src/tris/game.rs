@@ -55,6 +55,15 @@ impl Game {
         if x < 0 || x >= self.w || y < 0 || y >= self.h {
             Colour::Empty
         } else {
+            let index = (y * self.w + x) as usize;
+            self.board[index]
+        }
+    }
+
+    pub fn display_get(&self, x: isize, y: isize) -> Colour {
+        if x < 0 || x >= self.w || y < 0 || y >= self.h {
+            Colour::Empty
+        } else {
             if self.block.get(x - self.x, y - self.y) {
                 self.block.colour()
             } else {
@@ -74,8 +83,8 @@ impl Game {
     fn set(&mut self, x: isize, y: isize, colour: Colour) {
         if x < 0 || x >= self.w || y < 0 || y >= self.h {
             return
-        } 
-        
+        }
+
         let index = (y * self.w + x) as usize;
         self.board[index] = colour;
     }
@@ -85,7 +94,7 @@ impl Game {
 
         for by in 0..bh {
             for bx in 0..bw {
-                if self.block.get(bw, by) {
+                if self.block.get(bx, by) {
                     let x = x + bx;
                     let y = y + by;
                     if x < 0 || x >= self.w || y < 0 || y >= self.h {
@@ -94,6 +103,7 @@ impl Game {
                 }
             }
         }
+
         false
     }
 
@@ -102,7 +112,7 @@ impl Game {
 
         for by in 0..bh {
             for bx in 0..bw {
-                if self.block.get(bw, by) {
+                if self.block.get(bx, by) {
                     if self.filled(x + bx, y + by) {
                         return true
                     }
