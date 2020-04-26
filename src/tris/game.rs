@@ -40,7 +40,13 @@ impl Game {
             self.board[i] = Colour::Empty;
         }
     }
-    
+
+    pub fn random(&mut self) {
+        let (dx, dy) = self.block.random();
+        self.x = self.w / 2 + dx;
+        self.y = dy;
+    }
+
     pub fn dims(&self) -> (isize, isize) {
         (self.w, self.h)
     }
