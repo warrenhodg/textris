@@ -1,16 +1,7 @@
 use super::Colour;
 
-pub enum BlockType {
-    T,
-    LL,
-    RL,
-    B,
-    LZ,
-    RZ,
-    I,
-}
-
 pub trait Block {
+    fn random(&mut self);
     fn colour(&self) -> Colour;
     fn rotate_clockwise(&mut self);
     fn rotate_anticlockwise(&mut self);
@@ -21,6 +12,7 @@ pub trait Block {
 
 type UBlockValue = u16;
 const UBLOCK_SPAN: isize = 4;
+const BLOCK_TYPE_COUNT: usize = 7;
 
 pub struct UBlock {
     value: UBlockValue,
@@ -29,30 +21,52 @@ pub struct UBlock {
     colour: Colour,
 }
 
+pub fn new() -> UBlock {
+    UBlock {
+        value: 0x0000,
+        w: 0,
+        h: 0,
+        colour: Colour::Empty,
+    }
+}
+
+#[cfg(test)]
+pub const TEST_BLOCK: UBlock = UBlock {
+    value: 0x0072,
+    w: 3,
+    h: 2,
+    colour: Colour::Value(0),
+};
+
 impl UBlock {
-    pub fn new(t: BlockType) -> UBlock {
-        match t {
-            BlockType::T  => UBlock::setup(0x0002|0x0010|0x0020|0x0040, 3, 2, Colour::Value(0)),
-            BlockType::LL => UBlock::setup(0x0002|0x0020|0x0100|0x0200, 3, 3, Colour::Value(1)),
-            BlockType::RL => UBlock::setup(0x0001|0x0010|0x0100|0x0200, 3, 3, Colour::Value(2)),
-            BlockType::B  => UBlock::setup(0x0001|0x0020|0x0010|0x0020, 2, 2, Colour::Value(3)),
-            BlockType::LZ => UBlock::setup(0x0001|0x0002|0x0020|0x0040, 3, 3, Colour::Value(4)),
-            BlockType::RZ => UBlock::setup(0x0002|0x0004|0x0010|0x0020, 3, 3, Colour::Value(5)),
-            BlockType::I  => UBlock::setup(0x0002|0x0020|0x0040|0x0080, 3, 4, Colour::Value(6)),
+    fn setup_block(&mut self, block_type: usize) {
+        let block_type = block_type % BLOCK_TYPE_COUNT;
+
+        match block_type {
+            0 => self.setup(0x0002|0x0010|0x0020|0x0040, 3, 2, Colour::Value(block_type)), //T
+            1 => self.setup(0x0002|0x0020|0x0100|0x0200, 3, 3, Colour::Value(block_type)), //LL
+            2 => self.setup(0x0001|0x0010|0x0100|0x0200, 3, 3, Colour::Value(block_type)), //RL
+            3 => self.setup(0x0001|0x0020|0x0010|0x0020, 2, 2, Colour::Value(block_type)), //B
+            4 => self.setup(0x0001|0x0002|0x0020|0x0040, 3, 3, Colour::Value(block_type)), //LZ
+            5 => self.setup(0x0002|0x0004|0x0010|0x0020, 3, 3, Colour::Value(block_type)), //RZ
+            6 => self.setup(0x0002|0x0020|0x0040|0x0080, 3, 4, Colour::Value(block_type)), //I
+            _ => (),
         }
     }
 
-    fn setup(value: UBlockValue, w: isize, h: isize, colour: Colour) -> UBlock {
-        UBlock {
-            value: value,
-            w: w,
-            h: h,
-            colour: colour,
-        }
+    fn setup(&mut self, value: UBlockValue, w: isize, h: isize, colour: Colour) {
+        self.value = value;
+        self.w = w;
+        self.h = h;
+        self.colour = colour;
     }
 }
 
 impl Block for UBlock {
+    fn random(&mut self) {
+        self.setup_block(rand::random::<usize>());
+    }
+
     fn colour(&self) -> Colour {
         self.colour
     }
@@ -133,82 +147,84 @@ mod tests {
 
     #[test]
     fn block_new() {
-        let cases: Vec<(BlockType, UBlockValue, isize, isize)> = vec![
-            (BlockType::T, 0x0072, 3, 2),
+        let b = new();
+
+        assert_eq!(b.value, 0);
+        assert_eq!(b.w, 0);
+        assert_eq!(b.h, 0);
+        assert_eq!(b.colour, Colour::Empty);
+    }
+
+    #[test]
+    fn block_setup() {
+        let mut b = new();
+
+        let cases: Vec<(UBlockValue, isize, isize, Colour)> = vec![
+            (0x0072, 3, 2, Colour::Value(0)),
         ];
 
         for case in cases {
-            let (block_type, want_value, want_width, want_height) = case;
+            let (value, width, height, colour) = case;
 
-            let b = UBlock::new(block_type);
+            b.setup(value, width, height, colour);
 
-            assert_eq!(b.value, want_value);
-            assert_eq!(b.w, want_width);
-            assert_eq!(b.h, want_height);
+            assert_eq!(b.value, value);
+            assert_eq!(b.w, width);
+            assert_eq!(b.h, height);
+            assert_eq!(b.colour, colour);
         }
     }
 
     #[test]
     fn block_get() {
-        let cases: Vec<(BlockType, UBlockValue, Vec<(isize, isize, bool)>)> = vec![
-            (BlockType::T, 0x0072, vec![
-              (-1, -1, false),
-              (0, -1, false),
-              (10, -1, false),
-              (-1, 0, false),
-              (0, 0, false),
-              (1, 0, true),
-              (2, 0, false),
-              (10, 0, false),
-              (0, 1, true),
-              (1, 1, true),
-              (2, 1, true),
-            ]),
-        ];
+        let mut b = new();
 
-        for case in cases {
-            let (block_type, want_value, tests) = case;
-            let b = UBlock::new(block_type);
-            assert_eq!(b.value, want_value, "value");
-
-            for test in tests {
-                let (x, y, want_filled) = test;
-                assert_eq!(b.get(x, y), want_filled, "get");
-            }
-        }
+        b.setup(0xffff, 2, 2, Colour::Value(0));
+        assert_eq!(b.get(-1, -1), false);
+        assert_eq!(b.get(0, 0), true);
+        assert_eq!(b.get(1, 0), true);
+        assert_eq!(b.get(0, 1), true);
+        assert_eq!(b.get(1, 1), true);
+        assert_eq!(b.get(2, 2), false);
     }
 
     #[test]
     fn block_rotate_clockwise() {
-        let cases: Vec<(BlockType, UBlockValue, isize, isize)> = vec![
-            (BlockType::T, 0x0131, 2, 3),
+        let mut b = new();
+
+        let cases: Vec<(UBlockValue, isize, isize, UBlockValue, isize, isize)> = vec![
+            (0x0072, 3, 2, 0x0131, 2, 3),
         ];
 
         for case in cases {
-            let (block_type, want_value, want_width, want_height) = case;
+            let (value, w, h, want_value, want_w, want_h) = case;
 
-            let mut b = UBlock::new(block_type);
+            b.setup(value, w, h, Colour::Value(0));
             b.rotate_clockwise();
+
             assert!(b.value == want_value, format!("received value 0x{0:04x?} instead of 0x{1:04x?}", b.value, want_value));
-            assert!(b.w == want_width, format!("received w {0} instead of {1}", b.w, want_width));
-            assert!(b.h == want_height, format!("received h {0} instead of {1}", b.h, want_height));
+            assert!(b.w == want_w, format!("received w {0} instead of {1}", b.w, want_w));
+            assert!(b.h == want_h, format!("received h {0} instead of {1}", b.h, want_h));
         }
     }
 
     #[test]
     fn block_rotate_anticlockwise() {
-        let cases: Vec<(BlockType, UBlockValue, isize, isize)> = vec![
-            (BlockType::T, 0x2320, 2, 3),
+        let mut b = new();
+
+        let cases: Vec<(UBlockValue, isize, isize, UBlockValue, isize, isize)> = vec![
+            (0x0072, 3, 2, 0x2320, 2, 3),
         ];
 
         for case in cases {
-            let (block_type, want_value, want_width, want_height) = case;
+            let (value, w, h, want_value, want_w, want_h) = case;
 
-            let mut b = UBlock::new(block_type);
+            b.setup(value, w, h, Colour::Value(0));
             b.rotate_anticlockwise();
-            assert!(b.value == want_value, format!("received value {0:4x} instead of {1:4x}", b.value, want_value));
-            assert!(b.w == want_width, format!("received w {0} instead of {1}", b.w, want_width));
-            assert!(b.h == want_height, format!("received h {0} instead of {1}", b.h, want_height));
+
+            assert!(b.value == want_value, format!("received value 0x{0:04x?} instead of 0x{1:04x?}", b.value, want_value));
+            assert!(b.w == want_w, format!("received w {0} instead of {1}", b.w, want_w));
+            assert!(b.h == want_h, format!("received h {0} instead of {1}", b.h, want_h));
         }
     }
 }
