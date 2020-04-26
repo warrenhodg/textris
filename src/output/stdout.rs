@@ -73,6 +73,11 @@ impl <'a> Output for termion::raw::RawTerminal<std::io::Stdout> {
                color::Fg(color::Rgb(255, 255, 0)),
                ).unwrap();
 
+        write!(self, "{}Score: {}{}\r\n\r\n",
+                   color::Fg(color::Rgb(128, 128, 128)),
+                   color::Fg(color::Rgb(255, 196, 196)),
+                   game.get_score()).unwrap();
+
         for y in 0..height {
             // Display left wall
             write!(self, "{}{}{}",

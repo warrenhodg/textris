@@ -8,6 +8,7 @@ pub struct Game {
     w: isize,
     h: isize,
     board: Vec<Colour>,
+    score: isize,
     last_fall: std::time::Instant,
     fall_rate_nanos: u128,
 }
@@ -28,21 +29,27 @@ impl Game {
                 w: w,
                 h: h,
                 board: board,
+                score: 0,
                 last_fall: std::time::Instant::now(),
                 fall_rate_nanos: std::time::Duration::from_millis(1000).as_nanos(),
             };
 
-            g.clear();
-            g.random();
+            g.new_game();
 
             Ok(g)
         }
     }
 
-    pub fn clear(&mut self) {
+    pub fn new_game(&mut self) {
         for i in 0..(self.w * self.h) as usize {
             self.board[i] = Colour::Empty;
         }
+        self.random();
+        self.score = 0;
+    }
+
+    pub fn get_score(&self) -> isize {
+        self.score
     }
 
     pub fn random(&mut self) {
@@ -192,7 +199,7 @@ impl Game {
         }
     }
 
-    pub fn merge(&mut self) {
+    pub fn merge(&mut self) -> isize {
         let (bw, bh) = self.block.dims();
 
         for by in 0..bh {
@@ -200,6 +207,52 @@ impl Game {
                 if self.block.get(bx, by) {
                     self.set(self.x + bx, self.y + by, self.block.colour());
                 }
+            }
+        }
+
+        let count = self.remove_lines();
+        if count > 0 {
+            self.score += 1 << count;
+        }
+
+        count
+    }
+
+    pub fn remove_lines(&mut self) -> isize {
+        let (_, bh) = self.block.dims();
+
+        let mut count = 0 as isize;
+
+        for by in 0..bh {
+            let y = by + self.y;
+            if self.is_full_line(y) {
+                self.move_lines_down(y);
+                count += 1;
+            }
+        }
+
+        count
+    }
+
+    pub fn is_full_line(&self, y: isize) -> bool {
+        for x in 0..self.w {
+            if !self.filled(x, y) {
+                return false;
+            }
+        }
+
+        true
+    }
+
+    pub fn move_lines_down(&mut self, y: isize) {
+        for x in 0..self.w {
+            let mut index = x;
+            let mut prev = Colour::Empty;
+            for _ in 0..y {
+                index += self.w;
+                let this = self.board[index as usize];
+                self.board[index as usize] = prev;
+                prev = this;
             }
         }
     }
