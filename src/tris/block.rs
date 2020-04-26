@@ -11,14 +11,6 @@ pub struct Block {
     colour: Colour,
 }
 
-#[cfg(test)]
-pub const TEST_BLOCK: Block = Block {
-    value: 0x0072,
-    w: 3,
-    h: 2,
-    colour: Colour::Value(0),
-};
-
 impl Block {
     pub fn new() -> Self {
         Self {
@@ -50,6 +42,11 @@ impl Block {
         self.h = h;
         self.colour = colour;
         (-w / 2, 0)
+    }
+
+    #[cfg(test)]
+    pub fn test(&mut self) -> (isize, isize) {
+        self.setup_block(0)
     }
 
     pub fn random(&mut self) -> (isize, isize) {
