@@ -18,6 +18,7 @@ pub trait Game {
 }
 
 pub struct VecGame {
+    b: dyn &Block,
     w: isize,
     h: isize,
     board: Vec<Colour>,
@@ -33,6 +34,7 @@ impl VecGame {
             board.resize((w * h) as usize, Colour::Empty);
 
             Ok(VecGame {
+                b: super::block::new(),
                 w: w,
                 h: h,
                 board: board,
