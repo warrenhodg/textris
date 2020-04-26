@@ -31,7 +31,10 @@ fn block_style(i: u16) -> String {
 
 impl <'a> Output for termion::raw::RawTerminal<std::io::Stdout> {
     fn reset(&mut self) {
-        write!(self, "{}", termion::style::Reset).unwrap();
+        write!(self, "{}{}", 
+            termion::cursor::Show,
+            termion::style::Reset,
+            ).unwrap();
     }
 
     fn show_main_menu(&mut self) {
