@@ -17,7 +17,7 @@ pub fn new<'a>() -> termion::raw::RawTerminal<std::io::Stdout> {
     stdout
 }
 
-fn block_style(i: u16) -> String {
+fn block_style(i: usize) -> String {
     match i {
         0 => color::Fg(color::Rgb(196, 0, 0)),
         1 => color::Fg(color::Rgb(196, 196, 0)),
