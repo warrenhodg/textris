@@ -1,8 +1,7 @@
 pub mod stdin;
 
-use termion::event::Key;
-
+pub type InputKey = char;
 
 pub trait Input {
-    fn get_key(&mut self) -> Option<Result<Key, std::io::Error>>;
+    fn get_key(&mut self) -> Option<InputKey>;
 }
