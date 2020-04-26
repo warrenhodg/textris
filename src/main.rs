@@ -14,7 +14,7 @@ const VERSION: &'static str = env!("CARGO_PKG_VERSION");
 #[structopt(name = "textris", about = "A terminal-based tetris clone", version = VERSION)]
 struct Opt {
     /// The width of the board
-    #[structopt(short, long, default_value = "10")]
+    #[structopt(short, long, default_value = "11")]
     width: isize,
 
     /// The height of the board
