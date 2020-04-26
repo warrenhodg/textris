@@ -17,14 +17,15 @@ pub fn new<'a>() -> termion::raw::RawTerminal<std::io::Stdout> {
     stdout
 }
 
-fn block_style(i: u16) -> String {
+fn block_style(i: usize) -> String {
     match i {
-        0 => color::Fg(color::Rgb(196, 0, 0)),
-        1 => color::Fg(color::Rgb(196, 196, 0)),
-        2 => color::Fg(color::Rgb(0, 196, 0)),
-        3 => color::Fg(color::Rgb(0, 196, 196)),
-        4 => color::Fg(color::Rgb(0, 0, 196)),
-        5 => color::Fg(color::Rgb(196, 0, 196)),
+        0 => color::Fg(color::Rgb(196, 128, 128)),
+        1 => color::Fg(color::Rgb(196, 196, 128)),
+        2 => color::Fg(color::Rgb(128, 196, 128)),
+        3 => color::Fg(color::Rgb(128, 196, 196)),
+        4 => color::Fg(color::Rgb(128, 128, 196)),
+        5 => color::Fg(color::Rgb(196, 128, 196)),
+        6 => color::Fg(color::Rgb(226, 128, 128)),
         _ => color::Fg(color::Rgb(196, 196, 196)),
     }.to_string()
 }
@@ -57,7 +58,7 @@ impl <'a> Output for termion::raw::RawTerminal<std::io::Stdout> {
         self.flush().unwrap();
     }
 
-    fn show_game(&mut self, game: &mut dyn Game) {
+    fn show_game(&mut self, game: &Game) {
         let (width, height) = game.dims();
 
         write!(self, "{}{}", termion::clear::All, termion::cursor::Goto(1, 1)).unwrap();

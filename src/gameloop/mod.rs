@@ -1,6 +1,5 @@
 use super::input::Input;
 use super::output::Output;
-use super::tris::VecGame;
 
 const GAME_LOOP_PERIOD: std::time::Duration = std::time::Duration::from_millis(10);
 
@@ -51,7 +50,7 @@ impl <'a> GameLoop<'a> {
 
     fn play_game(&mut self, width: isize, height: isize) {
         let mut changed = true;
-        let g = &mut VecGame::new(width, height).unwrap();
+        let g = &mut super::tris::Game::new(width, height).unwrap();
 
         self.output.show_game(g);
 
