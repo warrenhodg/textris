@@ -40,10 +40,11 @@ impl <'a> Output for termion::raw::RawTerminal<std::io::Stdout> {
 
     fn show_main_menu(&mut self) {
         write!(self, "{}{}{}",
-               termion::clear::All,
-               termion::color::Fg(termion::color::Rgb(196, 196, 196)),
-               termion::cursor::Goto(1, 1),
-               ).unwrap();
+            termion::clear::All,
+            termion::color::Fg(termion::color::Rgb(196, 196, 196)),
+            termion::cursor::Goto(1, 1),
+            ).unwrap();
+
         //write!(self, "textris-{}\r\n", VERSION).unwrap();
         write!(self, "\r\n").unwrap();
         write!(self, "Menu:\r\n").unwrap();
@@ -63,27 +64,27 @@ impl <'a> Output for termion::raw::RawTerminal<std::io::Stdout> {
 
         write!(self, "{}{}", termion::clear::All, termion::cursor::Goto(1, 1)).unwrap();
         write!(self, "{}T{}E{}X{}T{}R{}I{}S{}!\r\n\r\n",
-               color::Fg(color::Rgb(255, 0, 0)),
-               color::Fg(color::Rgb(255, 255, 0)),
-               color::Fg(color::Rgb(0, 255, 0)),
-               color::Fg(color::Rgb(0, 255, 255)),
-               color::Fg(color::Rgb(0, 0, 255)),
-               color::Fg(color::Rgb(255, 0, 255)),
-               color::Fg(color::Rgb(255, 0, 0)),
-               color::Fg(color::Rgb(255, 255, 0)),
-               ).unwrap();
+            color::Fg(color::Rgb(255, 0, 0)),
+            color::Fg(color::Rgb(255, 255, 0)),
+            color::Fg(color::Rgb(0, 255, 0)),
+            color::Fg(color::Rgb(0, 255, 255)),
+            color::Fg(color::Rgb(0, 0, 255)),
+            color::Fg(color::Rgb(255, 0, 255)),
+            color::Fg(color::Rgb(255, 0, 0)),
+            color::Fg(color::Rgb(255, 255, 0)),
+            ).unwrap();
 
         write!(self, "{}Score: {}{}\r\n\r\n",
-                   color::Fg(color::Rgb(128, 128, 128)),
-                   color::Fg(color::Rgb(255, 196, 196)),
-                   game.get_score()).unwrap();
+            color::Fg(color::Rgb(128, 128, 128)),
+            color::Fg(color::Rgb(255, 196, 196)),
+            game.get_score()).unwrap();
 
         for y in 0..height {
             // Display left wall
             write!(self, "{}{}{}",
-                   color::Fg(color::Rgb(128, 128, 128)),
-                   color::Bg(color::Rgb(96, 96, 96)),
-                   BLOCK).unwrap();
+                color::Fg(color::Rgb(128, 128, 128)),
+                color::Bg(color::Rgb(96, 96, 96)),
+                BLOCK).unwrap();
 
             // Display contents
             for x in 0..width {
@@ -101,18 +102,24 @@ impl <'a> Output for termion::raw::RawTerminal<std::io::Stdout> {
 
             // Display right wall
             write!(self, "{}{}{}\r\n",
-                   color::Fg(color::Rgb(128, 128, 128)),
-                   color::Bg(color::Rgb(96, 96, 96)),
-                   BLOCK).unwrap();
+                color::Fg(color::Rgb(128, 128, 128)),
+                color::Bg(color::Rgb(96, 96, 96)),
+                BLOCK).unwrap();
         }
 
         //Display bottom wall
         write!(self, "{}{}",
-                   color::Fg(color::Rgb(128, 128, 128)),
-                   color::Bg(color::Rgb(96, 96, 96))).unwrap();
+            color::Fg(color::Rgb(128, 128, 128)),
+            color::Bg(color::Rgb(96, 96, 96))).unwrap();
 
         for _ in 0..width+2 {
             write!(self, "{}", BLOCK).unwrap();
+        }
+
+        if game.is_game_over() {
+            write!(self, "\r\n\r\n{}{}Game Over\r\n",
+                color::Fg(color::Rgb(255, 196, 196)),
+                color::Bg(color::Rgb(0, 0, 0))).unwrap();
         }
 
         write!(self, "{}", color::Bg(color::Rgb(0, 0, 0))).unwrap();
