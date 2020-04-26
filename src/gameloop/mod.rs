@@ -17,7 +17,7 @@ pub fn new<'a>(input: &'a mut dyn Input, output: &'a mut dyn Output) -> GameLoop
 }
 
 impl <'a> GameLoop<'a> {
-    pub fn run(&mut self) {
+    pub fn run(&mut self, width: isize, height: isize) {
         let mut changed = true;
         let mut message = format!("");
 
@@ -35,7 +35,7 @@ impl <'a> GameLoop<'a> {
                 Some(k) => match k {
                     'q' => break 'run_loop,
                     'n' => {
-                        self.play_game();
+                        self.play_game(width, height);
                         changed = true;
                     },
                     _ => {
@@ -49,9 +49,9 @@ impl <'a> GameLoop<'a> {
         self.output.reset();
     }
 
-    fn play_game(&mut self) {
+    fn play_game(&mut self, width: isize, height: isize) {
         let mut changed = true;
-        let g = &mut VecGame::new(10, 10).unwrap();
+        let g = &mut VecGame::new(width, height).unwrap();
 
         self.output.show_game(g);
 
