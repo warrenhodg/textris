@@ -5,4 +5,5 @@ authors = ["Warren Hodgkinson <warren.hodgkinson@gmail.com>"]
 
 [dependencies]
 rand = "0.3"
+structopt = "0.3"
 termion = "1"
