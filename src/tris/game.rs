@@ -123,20 +123,64 @@ impl Game {
         false
     }
 
-    fn merge(&mut self, x: isize, y: isize) {
+    pub fn rotate_clockwise(&mut self) -> bool {
+        self.block.rotate_clockwise();
+        if self.collision(self.x, self.y) || self.out_of_bounds(self.x, self.y) {
+            self.block.rotate_anticlockwise();
+            return false
+        }
+
+        true
+    }
+
+    pub fn rotate_anticlockwise(&mut self) -> bool {
+        self.block.rotate_anticlockwise();
+        if self.collision(self.x, self.y) || self.out_of_bounds(self.x, self.y) {
+            self.block.rotate_clockwise();
+            return false
+        }
+
+        true
+    }
+
+    pub fn slide(&mut self, dx: isize) -> bool {
+        if self.collision(self.x + dx, self.y) || self.out_of_bounds(self.x + dx, self.y) {
+            return false;
+        }
+
+        self.x += dx;
+        true
+    }
+
+    pub fn down(&mut self) -> bool {
+        if self.collision(self.x, self.y + 1) || self.out_of_bounds(self.x, self.y + 1) {
+            return false;
+        }
+
+        self.y += 1;
+        true
+    }
+
+    pub fn drop (&mut self) {
+        loop {
+            if self.collision(self.x, self.y + 1) || self.out_of_bounds(self.x, self.y + 1) {
+                break;
+            }
+
+            self.y += 1;
+        }
+    }
+
+    pub fn merge(&mut self) {
         let (bw, bh) = self.block.dims();
 
         for by in 0..bh {
             for bx in 0..bw {
                 if self.block.get(bx, by) {
-                    self.set(x + bx, y + by, self.block.colour());
+                    self.set(self.x + bx, self.y + by, self.block.colour());
                 }
             }
         }
-    }
-
-    pub fn string(&self) -> String {
-        format!("{0}x{1}", self.w, self.h)
     }
 }
 
@@ -205,7 +249,7 @@ mod tests {
 
             g.block.test();
 
-            g.merge(x, y);
+            g.merge();
         }
     }
 }
