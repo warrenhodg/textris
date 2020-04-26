@@ -19,19 +19,19 @@ impl Game {
 
             board.resize((w * h) as usize, Colour::Empty);
 
-            let mut block = super::Block::new();
-            let (dx, dy) = block.random();
-
-            let mut b = Self {
-                x: w / 2 + dx,
-                y: 0 + dy,
-                block: block,
+            let mut g = Self {
+                x: 0,
+                y: 0,
+                block: super::Block::new(),
                 w: w,
                 h: h,
                 board: board,
             };
 
-            Ok(b)
+            g.clear();
+            g.random();
+
+            Ok(g)
         }
     }
 
@@ -40,12 +40,27 @@ impl Game {
             self.board[i] = Colour::Empty;
         }
     }
-    
+
+    pub fn random(&mut self) {
+        let (dx, dy) = self.block.random();
+        self.x = self.w / 2 + dx;
+        self.y = dy;
+    }
+
     pub fn dims(&self) -> (isize, isize) {
         (self.w, self.h)
     }
 
     pub fn get(&self, x: isize, y: isize) -> Colour {
+        if x < 0 || x >= self.w || y < 0 || y >= self.h {
+            Colour::Empty
+        } else {
+            let index = (y * self.w + x) as usize;
+            self.board[index]
+        }
+    }
+
+    pub fn display_get(&self, x: isize, y: isize) -> Colour {
         if x < 0 || x >= self.w || y < 0 || y >= self.h {
             Colour::Empty
         } else {
@@ -68,8 +83,8 @@ impl Game {
     fn set(&mut self, x: isize, y: isize, colour: Colour) {
         if x < 0 || x >= self.w || y < 0 || y >= self.h {
             return
-        } 
-        
+        }
+
         let index = (y * self.w + x) as usize;
         self.board[index] = colour;
     }
@@ -79,7 +94,7 @@ impl Game {
 
         for by in 0..bh {
             for bx in 0..bw {
-                if self.block.get(bw, by) {
+                if self.block.get(bx, by) {
                     let x = x + bx;
                     let y = y + by;
                     if x < 0 || x >= self.w || y < 0 || y >= self.h {
@@ -88,6 +103,7 @@ impl Game {
                 }
             }
         }
+
         false
     }
 
@@ -96,7 +112,7 @@ impl Game {
 
         for by in 0..bh {
             for bx in 0..bw {
-                if self.block.get(bw, by) {
+                if self.block.get(bx, by) {
                     if self.filled(x + bx, y + by) {
                         return true
                     }
@@ -107,20 +123,64 @@ impl Game {
         false
     }
 
-    fn merge(&mut self, x: isize, y: isize) {
+    pub fn rotate_clockwise(&mut self) -> bool {
+        self.block.rotate_clockwise();
+        if self.collision(self.x, self.y) || self.out_of_bounds(self.x, self.y) {
+            self.block.rotate_anticlockwise();
+            return false
+        }
+
+        true
+    }
+
+    pub fn rotate_anticlockwise(&mut self) -> bool {
+        self.block.rotate_anticlockwise();
+        if self.collision(self.x, self.y) || self.out_of_bounds(self.x, self.y) {
+            self.block.rotate_clockwise();
+            return false
+        }
+
+        true
+    }
+
+    pub fn slide(&mut self, dx: isize) -> bool {
+        if self.collision(self.x + dx, self.y) || self.out_of_bounds(self.x + dx, self.y) {
+            return false;
+        }
+
+        self.x += dx;
+        true
+    }
+
+    pub fn down(&mut self) -> bool {
+        if self.collision(self.x, self.y + 1) || self.out_of_bounds(self.x, self.y + 1) {
+            return false;
+        }
+
+        self.y += 1;
+        true
+    }
+
+    pub fn drop (&mut self) {
+        loop {
+            if self.collision(self.x, self.y + 1) || self.out_of_bounds(self.x, self.y + 1) {
+                break;
+            }
+
+            self.y += 1;
+        }
+    }
+
+    pub fn merge(&mut self) {
         let (bw, bh) = self.block.dims();
 
         for by in 0..bh {
             for bx in 0..bw {
                 if self.block.get(bx, by) {
-                    self.set(x + bx, y + by, self.block.colour());
+                    self.set(self.x + bx, self.y + by, self.block.colour());
                 }
             }
         }
-    }
-
-    pub fn string(&self) -> String {
-        format!("{0}x{1}", self.w, self.h)
     }
 }
 
@@ -189,7 +249,7 @@ mod tests {
 
             g.block.test();
 
-            g.merge(x, y);
+            g.merge();
         }
     }
 }

@@ -65,6 +65,43 @@ impl <'a> GameLoop<'a> {
                     std::thread::sleep(GAME_LOOP_PERIOD);
                 },
                 Some(k) => match k {
+                    'a' => {
+                        if g.slide(-1) {
+                            changed = true;
+                        }
+                    },
+                    'd' => {
+                        if g.slide(1) {
+                            changed = true;
+                        }
+                    },
+                    's' => {
+                        if g.down() {
+                            changed = true;
+                        } else {
+                            g.merge();
+                            // Check for lines
+                            g.random();
+                            // Merge and random
+                        }
+                    },
+                    'w' => {
+                        if g.rotate_clockwise() {
+                            changed = true;
+                        }
+                    },
+                    'W' => {
+                        if g.rotate_anticlockwise() {
+                            changed = true;
+                        }
+                    },
+                    ' ' => {
+                        g.drop();
+                        changed = true;
+                        g.merge();
+                        // Check for lines
+                        g.random();
+                    },
                     'q' => break 'play_loop,
                     _ => (),
                 }
