@@ -11,6 +11,7 @@ pub struct Game {
     score: isize,
     last_fall: std::time::Instant,
     fall_rate_nanos: u128,
+    game_over: bool,
 }
 
 impl Game {
@@ -32,6 +33,7 @@ impl Game {
                 score: 0,
                 last_fall: std::time::Instant::now(),
                 fall_rate_nanos: std::time::Duration::from_millis(1000).as_nanos(),
+                game_over: false,
             };
 
             g.new_game();
@@ -46,6 +48,7 @@ impl Game {
         }
         self.random();
         self.score = 0;
+        self.game_over = false;
     }
 
     pub fn get_score(&self) -> isize {
@@ -57,6 +60,10 @@ impl Game {
         self.x = self.w / 2 + dx;
         self.y = dy;
         self.last_fall = std::time::Instant::now();
+
+        if self.collision(self.x, self.y) {
+            self.game_over = true;
+        }
     }
 
     pub fn tick(&mut self) -> bool {
@@ -256,6 +263,10 @@ impl Game {
             }
         }
     }
+
+    pub fn is_game_over(&self) -> bool {
+        self.game_over
+    }
 }
 
 #[cfg(test)]
@@ -311,19 +322,12 @@ mod tests {
 
     #[test]
     fn game_merge() {
-        let cases: Vec<(isize, isize)> = vec![
-        ];
+        let mut g = Game::new(10, 10)
+            .ok()
+            .expect("could not create new game");
 
-        for case in cases {
-            let (x, y) = case;
+        g.block.test();
 
-            let mut g = Game::new(10, 10)
-                .ok()
-                .expect("could not create new game");
-
-            g.block.test();
-
-            g.merge();
-        }
+        g.merge();
     }
 }
