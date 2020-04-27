@@ -8,4 +8,3 @@ pub trait Output {
     fn show_message(&mut self, message: String);
     fn show_game(&mut self, game: &Game);
 }
-

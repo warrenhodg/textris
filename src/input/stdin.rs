@@ -19,9 +19,8 @@ impl Input for AsyncReader {
                 } else {
                     Option::<InputKey>::Some(buf[0] as char)
                 }
-            },
+            }
             _ => Option::<InputKey>::None,
         }
     }
 }
-

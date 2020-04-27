@@ -1,7 +1,7 @@
-mod tris;
+mod gameloop;
 mod input;
 mod output;
-mod gameloop;
+mod tris;
 
 extern crate structopt;
 extern crate termion;
