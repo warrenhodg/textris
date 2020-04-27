@@ -25,13 +25,48 @@ impl Block {
         let block_type = block_type % BLOCK_TYPE_COUNT;
 
         match block_type {
-            0 => self.setup(0x0002|0x0010|0x0020|0x0040, 3, 2, Colour::Value(block_type)), //T
-            1 => self.setup(0x0001|0x0002|0x0004|0x0010, 3, 2, Colour::Value(block_type)), //LL
-            2 => self.setup(0x0001|0x0002|0x0004|0x0040, 3, 2, Colour::Value(block_type)), //RL
-            3 => self.setup(0x0001|0x0002|0x0010|0x0020, 2, 2, Colour::Value(block_type)), //B
-            4 => self.setup(0x0001|0x0002|0x0020|0x0040, 3, 2, Colour::Value(block_type)), //LZ
-            5 => self.setup(0x0002|0x0004|0x0010|0x0020, 3, 2, Colour::Value(block_type)), //RZ
-            6 => self.setup(0x0001|0x0002|0x0004|0x0008, 4, 1, Colour::Value(block_type)), //I
+            0 => self.setup(
+                0x0002 | 0x0010 | 0x0020 | 0x0040,
+                3,
+                2,
+                Colour::Value(block_type),
+            ), //T
+            1 => self.setup(
+                0x0001 | 0x0002 | 0x0004 | 0x0010,
+                3,
+                2,
+                Colour::Value(block_type),
+            ), //LL
+            2 => self.setup(
+                0x0001 | 0x0002 | 0x0004 | 0x0040,
+                3,
+                2,
+                Colour::Value(block_type),
+            ), //RL
+            3 => self.setup(
+                0x0001 | 0x0002 | 0x0010 | 0x0020,
+                2,
+                2,
+                Colour::Value(block_type),
+            ), //B
+            4 => self.setup(
+                0x0001 | 0x0002 | 0x0020 | 0x0040,
+                3,
+                2,
+                Colour::Value(block_type),
+            ), //LZ
+            5 => self.setup(
+                0x0002 | 0x0004 | 0x0010 | 0x0020,
+                3,
+                2,
+                Colour::Value(block_type),
+            ), //RZ
+            6 => self.setup(
+                0x0001 | 0x0002 | 0x0004 | 0x0008,
+                4,
+                1,
+                Colour::Value(block_type),
+            ), //I
             _ => (0, 0),
         }
     }
@@ -141,9 +176,7 @@ mod tests {
     fn block_setup() {
         let mut b = Block::new();
 
-        let cases: Vec<(BlockValue, isize, isize, Colour)> = vec![
-            (0x0072, 3, 2, Colour::Value(0)),
-        ];
+        let cases: Vec<(BlockValue, isize, isize, Colour)> = vec![(0x0072, 3, 2, Colour::Value(0))];
 
         for case in cases {
             let (value, width, height, colour) = case;
@@ -174,9 +207,8 @@ mod tests {
     fn block_rotate_clockwise() {
         let mut b = Block::new();
 
-        let cases: Vec<(BlockValue, isize, isize, BlockValue, isize, isize)> = vec![
-            (0x0072, 3, 2, 0x0131, 2, 3),
-        ];
+        let cases: Vec<(BlockValue, isize, isize, BlockValue, isize, isize)> =
+            vec![(0x0072, 3, 2, 0x0131, 2, 3)];
 
         for case in cases {
             let (value, w, h, want_value, want_w, want_h) = case;
@@ -184,9 +216,21 @@ mod tests {
             b.setup(value, w, h, Colour::Value(0));
             b.rotate_clockwise();
 
-            assert!(b.value == want_value, format!("received value 0x{0:04x?} instead of 0x{1:04x?}", b.value, want_value));
-            assert!(b.w == want_w, format!("received w {0} instead of {1}", b.w, want_w));
-            assert!(b.h == want_h, format!("received h {0} instead of {1}", b.h, want_h));
+            assert!(
+                b.value == want_value,
+                format!(
+                    "received value 0x{0:04x?} instead of 0x{1:04x?}",
+                    b.value, want_value
+                )
+            );
+            assert!(
+                b.w == want_w,
+                format!("received w {0} instead of {1}", b.w, want_w)
+            );
+            assert!(
+                b.h == want_h,
+                format!("received h {0} instead of {1}", b.h, want_h)
+            );
         }
     }
 
@@ -194,9 +238,8 @@ mod tests {
     fn block_rotate_anticlockwise() {
         let mut b = Block::new();
 
-        let cases: Vec<(BlockValue, isize, isize, BlockValue, isize, isize)> = vec![
-            (0x0072, 3, 2, 0x0232, 2, 3),
-        ];
+        let cases: Vec<(BlockValue, isize, isize, BlockValue, isize, isize)> =
+            vec![(0x0072, 3, 2, 0x0232, 2, 3)];
 
         for case in cases {
             let (value, w, h, want_value, want_w, want_h) = case;
@@ -204,9 +247,21 @@ mod tests {
             b.setup(value, w, h, Colour::Value(0));
             b.rotate_anticlockwise();
 
-            assert!(b.value == want_value, format!("received value 0x{0:04x?} instead of 0x{1:04x?}", b.value, want_value));
-            assert!(b.w == want_w, format!("received w {0} instead of {1}", b.w, want_w));
-            assert!(b.h == want_h, format!("received h {0} instead of {1}", b.h, want_h));
+            assert!(
+                b.value == want_value,
+                format!(
+                    "received value 0x{0:04x?} instead of 0x{1:04x?}",
+                    b.value, want_value
+                )
+            );
+            assert!(
+                b.w == want_w,
+                format!("received w {0} instead of {1}", b.w, want_w)
+            );
+            assert!(
+                b.h == want_h,
+                format!("received h {0} instead of {1}", b.h, want_h)
+            );
         }
     }
 }

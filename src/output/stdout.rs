@@ -1,11 +1,10 @@
-use super::Output;
 use super::super::tris::Colour;
 use super::Game;
+use super::Output;
 
 use std::io::Write;
-use termion::raw::IntoRawMode;
 use termion::color;
-
+use termion::raw::IntoRawMode;
 
 const BLOCK: &'static str = "\u{259A}";
 
@@ -19,31 +18,63 @@ pub fn new<'a>() -> termion::raw::RawTerminal<std::io::Stdout> {
 
 fn block_style(i: usize) -> String {
     match i {
-        0 => format!("{}{}", color::Fg(color::Rgb(255, 128, 128)), color::Bg(color::Rgb(196, 128, 128))),
-        1 => format!("{}{}", color::Fg(color::Rgb(255, 255, 128)), color::Bg(color::Rgb(196, 196, 128))),
-        2 => format!("{}{}", color::Fg(color::Rgb(128, 255, 128)), color::Bg(color::Rgb(128, 196, 128))),
-        3 => format!("{}{}", color::Fg(color::Rgb(128, 255, 255)), color::Bg(color::Rgb(128, 196, 196))),
-        4 => format!("{}{}", color::Fg(color::Rgb(128, 128, 255)), color::Bg(color::Rgb(128, 128, 196))),
-        5 => format!("{}{}", color::Fg(color::Rgb(255, 128, 255)), color::Bg(color::Rgb(196, 128, 196))),
-        6 => format!("{}{}", color::Fg(color::Rgb(226, 128, 128)), color::Bg(color::Rgb(196, 128, 128))),
-        _ => format!("{}{}", color::Fg(color::Rgb(255, 255, 255)), color::Bg(color::Rgb(196, 196, 196))),
+        0 => format!(
+            "{}{}",
+            color::Fg(color::Rgb(255, 128, 128)),
+            color::Bg(color::Rgb(196, 128, 128))
+        ),
+        1 => format!(
+            "{}{}",
+            color::Fg(color::Rgb(255, 255, 128)),
+            color::Bg(color::Rgb(196, 196, 128))
+        ),
+        2 => format!(
+            "{}{}",
+            color::Fg(color::Rgb(128, 255, 128)),
+            color::Bg(color::Rgb(128, 196, 128))
+        ),
+        3 => format!(
+            "{}{}",
+            color::Fg(color::Rgb(128, 255, 255)),
+            color::Bg(color::Rgb(128, 196, 196))
+        ),
+        4 => format!(
+            "{}{}",
+            color::Fg(color::Rgb(128, 128, 255)),
+            color::Bg(color::Rgb(128, 128, 196))
+        ),
+        5 => format!(
+            "{}{}",
+            color::Fg(color::Rgb(255, 128, 255)),
+            color::Bg(color::Rgb(196, 128, 196))
+        ),
+        6 => format!(
+            "{}{}",
+            color::Fg(color::Rgb(226, 196, 128)),
+            color::Bg(color::Rgb(196, 128, 128))
+        ),
+        _ => format!(
+            "{}{}",
+            color::Fg(color::Rgb(255, 255, 255)),
+            color::Bg(color::Rgb(196, 196, 196))
+        ),
     }
 }
 
-impl <'a> Output for termion::raw::RawTerminal<std::io::Stdout> {
+impl<'a> Output for termion::raw::RawTerminal<std::io::Stdout> {
     fn reset(&mut self) {
-        write!(self, "{}{}", 
-            termion::cursor::Show,
-            termion::style::Reset,
-            ).unwrap();
+        write!(self, "{}{}", termion::cursor::Show, termion::style::Reset,).unwrap();
     }
 
     fn show_main_menu(&mut self) {
-        write!(self, "{}{}{}",
+        write!(
+            self,
+            "{}{}{}",
             termion::clear::All,
             termion::color::Fg(termion::color::Rgb(196, 196, 196)),
             termion::cursor::Goto(1, 1),
-            ).unwrap();
+        )
+        .unwrap();
 
         //write!(self, "textris-{}\r\n", VERSION).unwrap();
         write!(self, "\r\n").unwrap();
@@ -62,8 +93,16 @@ impl <'a> Output for termion::raw::RawTerminal<std::io::Stdout> {
     fn show_game(&mut self, game: &Game) {
         let (width, height) = game.dims();
 
-        write!(self, "{}{}", termion::clear::All, termion::cursor::Goto(1, 1)).unwrap();
-        write!(self, "{}T{}E{}X{}T{}R{}I{}S{}!\r\n\r\n",
+        write!(
+            self,
+            "{}{}",
+            termion::clear::All,
+            termion::cursor::Goto(1, 1)
+        )
+        .unwrap();
+        write!(
+            self,
+            "{}T{}E{}X{}T{}R{}I{}S{}!\r\n\r\n",
             color::Fg(color::Rgb(255, 0, 0)),
             color::Fg(color::Rgb(255, 255, 0)),
             color::Fg(color::Rgb(0, 255, 0)),
@@ -72,54 +111,77 @@ impl <'a> Output for termion::raw::RawTerminal<std::io::Stdout> {
             color::Fg(color::Rgb(255, 0, 255)),
             color::Fg(color::Rgb(255, 0, 0)),
             color::Fg(color::Rgb(255, 255, 0)),
-            ).unwrap();
+        )
+        .unwrap();
 
-        write!(self, "{}Score: {}{}\r\n\r\n",
+        write!(
+            self,
+            "{}Score: {}{}\r\n\r\n",
             color::Fg(color::Rgb(128, 128, 128)),
             color::Fg(color::Rgb(255, 196, 196)),
-            game.get_score()).unwrap();
+            game.get_score()
+        )
+        .unwrap();
 
         for y in 0..height {
             // Display left wall
-            write!(self, "{}{}{}",
+            write!(
+                self,
+                "{}{}{}",
                 color::Fg(color::Rgb(128, 128, 128)),
                 color::Bg(color::Rgb(96, 96, 96)),
-                BLOCK).unwrap();
+                BLOCK
+            )
+            .unwrap();
 
             // Display contents
             for x in 0..width {
                 match game.display_get(x, y) {
-                    Colour::Empty => write!(self, "{}{}{}",
+                    Colour::Empty => write!(
+                        self,
+                        "{}{}{}",
                         color::Fg(color::Rgb(0, 0, 0)),
                         color::Bg(color::Rgb(0, 0, 0)),
-                        BLOCK).unwrap(),
+                        BLOCK
+                    )
+                    .unwrap(),
 
-                    Colour::Value(i) => write!(self, "{}{}",
-                        block_style(i),
-                        BLOCK).unwrap(),
+                    Colour::Value(i) => write!(self, "{}{}", block_style(i), BLOCK).unwrap(),
                 }
             }
 
             // Display right wall
-            write!(self, "{}{}{}\r\n",
+            write!(
+                self,
+                "{}{}{}\r\n",
                 color::Fg(color::Rgb(128, 128, 128)),
                 color::Bg(color::Rgb(96, 96, 96)),
-                BLOCK).unwrap();
+                BLOCK
+            )
+            .unwrap();
         }
 
         //Display bottom wall
-        write!(self, "{}{}",
+        write!(
+            self,
+            "{}{}",
             color::Fg(color::Rgb(128, 128, 128)),
-            color::Bg(color::Rgb(96, 96, 96))).unwrap();
+            color::Bg(color::Rgb(96, 96, 96))
+        )
+        .unwrap();
 
-        for _ in 0..width+2 {
+        for _ in 0..width + 2 {
             write!(self, "{}", BLOCK).unwrap();
         }
 
         if game.is_game_over() {
-            write!(self, "\r\n\r\n{}{}Game Over\r\n",
+            write!(
+                self,
+                "\r\n\r\n{}{}Game Over\r\n",
                 color::Fg(color::Rgb(255, 196, 196)),
-                color::Bg(color::Rgb(0, 0, 0))).unwrap();
+                color::Bg(color::Rgb(0, 0, 0))
+            )
+            .unwrap();
         }
 
         write!(self, "{}", color::Bg(color::Rgb(0, 0, 0))).unwrap();

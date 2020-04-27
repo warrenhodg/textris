@@ -1,5 +1,5 @@
-use super::Colour;
 use super::Block;
+use super::Colour;
 
 pub struct Game {
     x: isize,
@@ -115,7 +115,7 @@ impl Game {
 
     fn set(&mut self, x: isize, y: isize, colour: Colour) {
         if x < 0 || x >= self.w || y < 0 || y >= self.h {
-            return
+            return;
         }
 
         let index = (y * self.w + x) as usize;
@@ -131,7 +131,7 @@ impl Game {
                     let x = x + bx;
                     let y = y + by;
                     if x < 0 || x >= self.w || y < 0 || y >= self.h {
-                        return true
+                        return true;
                     }
                 }
             }
@@ -147,7 +147,7 @@ impl Game {
             for bx in 0..bw {
                 if self.block.get(bx, by) {
                     if self.filled(x + bx, y + by) {
-                        return true
+                        return true;
                     }
                 }
             }
@@ -160,7 +160,7 @@ impl Game {
         self.block.rotate_clockwise();
         if self.collision(self.x, self.y) || self.out_of_bounds(self.x, self.y) {
             self.block.rotate_anticlockwise();
-            return false
+            return false;
         }
 
         true
@@ -170,7 +170,7 @@ impl Game {
         self.block.rotate_anticlockwise();
         if self.collision(self.x, self.y) || self.out_of_bounds(self.x, self.y) {
             self.block.rotate_clockwise();
-            return false
+            return false;
         }
 
         true
@@ -191,12 +191,12 @@ impl Game {
         }
 
         self.last_fall = std::time::Instant::now();
- 
+
         self.y += 1;
         true
     }
 
-    pub fn drop (&mut self) {
+    pub fn drop(&mut self) {
         loop {
             if self.collision(self.x, self.y + 1) || self.out_of_bounds(self.x, self.y + 1) {
                 break;
@@ -275,11 +275,7 @@ mod tests {
 
     #[test]
     fn game_new() {
-        let cases: Vec<(isize, isize, bool)> = vec![
-            (3, 3, true),
-            (4, 4, false),
-            (10, 10, false),
-        ];
+        let cases: Vec<(isize, isize, bool)> = vec![(3, 3, true), (4, 4, false), (10, 10, false)];
 
         for case in cases {
             let (w, h, err) = case;
@@ -293,18 +289,19 @@ mod tests {
 
     #[test]
     fn game_get_set() {
-        let mut game = Game::new(10, 20)
-            .ok()
-            .expect("game could not be created");
+        let mut game = Game::new(10, 20).ok().expect("game could not be created");
 
-        let cases: Vec<(isize, isize, Colour, Vec<(isize, isize, Colour)>)> = vec![
-            (5, 5, Colour::Value(0), vec![
-               (-1, -1, Colour::Empty),
-               (0, 0, Colour::Empty),
-               (5, 5, Colour::Value(0)),
-               (15, 5, Colour::Empty),
-            ]),
-        ];
+        let cases: Vec<(isize, isize, Colour, Vec<(isize, isize, Colour)>)> = vec![(
+            5,
+            5,
+            Colour::Value(0),
+            vec![
+                (-1, -1, Colour::Empty),
+                (0, 0, Colour::Empty),
+                (5, 5, Colour::Value(0)),
+                (15, 5, Colour::Empty),
+            ],
+        )];
 
         for case in cases {
             let (x, y, colour, tests) = case;
@@ -315,16 +312,17 @@ mod tests {
 
                 let colour = game.get(x, y);
 
-                assert!(colour == want_colour, format!("expected {0} to equal {1}", colour, want_colour));
+                assert!(
+                    colour == want_colour,
+                    format!("expected {0} to equal {1}", colour, want_colour)
+                );
             }
         }
     }
 
     #[test]
     fn game_merge() {
-        let mut g = Game::new(10, 10)
-            .ok()
-            .expect("could not create new game");
+        let mut g = Game::new(10, 10).ok().expect("could not create new game");
 
         g.block.test();
 
